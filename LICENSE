@@ -1,0 +1,16 @@
+ELI Marketplace
+Copyright © 2026 Jason Fitzgibbon Bridgeman. All rights reserved.
+
+This repository is the ELI marketplace's registry: its index, listings,
+workflows and storefront material. Those belong to the operator. They are not
+licensed for reuse, except as needed to submit a package by pull request.
+
+The packages under plugins/ belong to their publishers. Each one is licensed by
+its publisher under the licence its manifest names (`license`, and
+`license_url` where the licence is not a standard one). Submitting a package
+grants the marketplace the rights set out in DEVELOPER_TERMS.md, and nothing
+more.
+
+ELI itself is licensed under the ELI End User Licence Agreement.
+
+Contact: jaybridgeman0095@gmail.com

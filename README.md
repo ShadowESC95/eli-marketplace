@@ -19,6 +19,10 @@ become the attack surface and the consent dialog would be spoofable.
 
 ## Submitting a plugin
 
+Submitting means accepting the **[developer terms](DEVELOPER_TERMS.md)**: your package
+stays yours, you choose its licence and its price, and the marketplace gets only what
+it needs to host, review, sign and list it.
+
 Open a pull request adding a directory under `plugins/`:
 
 ```
@@ -67,12 +71,21 @@ Exit 0 means no blocking findings. It does not mean approved.
 
 ## Selling a plugin
 
-A listing may carry a `price` and a `purchase_url`, and may require a licence key
-that the client passes to your own server. ELI does not process payments and
-cannot confirm one happened. Review is not escrow — that is between you and the
-buyer.
+Say how it is sold in the manifest: a `purchase` object (`model`: `free`,
+`perpetual`, `subscription`, `trial` or `external`; `price`; `currency`;
+`purchase_url`), and how a buyer's right is checked with `entitlement.method`
+(`none`, `local_key` or `publisher_api`). ELI shows the price, asks the buyer for a
+key when the method needs one, and passes it to you. Add `support_url`,
+`privacy_url` and `terms_url`; a package that uses the network should always link a
+privacy notice. Payment, refunds and tax are between you and the buyer. Review is
+not escrow.
 
 ## What review means
+
+Approval is a signature over the release: its id, version, checksum, permissions,
+dependencies and, for an MCP server, its launch command. **A version never
+changes.** To change any of those, publish a new version, which is reviewed again;
+ELI refuses a release that changes under a version it has already seen.
 
 A person read the code and nothing objected. That raises the floor. It does not
 prove the author is who they say, that a plugin does what it claims, or that a

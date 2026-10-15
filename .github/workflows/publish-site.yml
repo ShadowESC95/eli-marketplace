@@ -45,15 +45,18 @@ jobs:
 
       - name: Refuse to publish an unsigned listing
         # The client hard-refuses these, so publishing one would put a listing in
-        # the shop window that no user could install. Catch it here instead.
+        # the shop window that no user could install. Catch it here instead. The
+        # release signature is the one that counts: it covers the permissions and
+        # dependencies as well as the file (an MCP listing has no file at all).
         run: |
           python - <<'EOF'
           import json, sys
           data = json.load(open("index.json"))
           bad = [p.get("id") for p in data.get("plugins") or []
-                 if not (p.get("signature") and p.get("publisher_id"))]
+                 if not (p.get("release_signature") and p.get("publisher_id"))]
           if bad:
-              print("unsigned listings in index.json: " + ", ".join(map(str, bad)))
+              print("listings without a release signature in index.json: "
+                    + ", ".join(map(str, bad)))
               print("sign them with tools/marketplace/publish.py --sign-key")
               sys.exit(1)
           print(f"{len(data.get('plugins') or [])} listing(s), all signed")

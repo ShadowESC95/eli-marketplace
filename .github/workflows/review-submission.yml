@@ -15,6 +15,7 @@ on:
   pull_request:
     paths:
       - "plugins/**"
+      - "index.json"
 
 # A fork PR runs untrusted code's *scanners*, not the code itself — but keep the
 # token read-only regardless, so a malicious submission cannot write to the repo.
@@ -60,6 +61,34 @@ jobs:
           echo "dirs<<EOF" >> "$GITHUB_OUTPUT"
           echo "$dirs" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse to change a published version
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          python - <<'EOF'
+          # One id and version is one release. ELI refuses a listing whose checksum,
+          # permissions, dependencies or launch command change under a version it
+          # has already seen, so catch it here rather than on users' machines.
+          import json, subprocess, sys
+          sys.path.insert(0, ".eli")
+          from eli.plugins.integrity import release_digest
+          def entries(text):
+              return {(p.get("id"), str(p.get("version"))): release_digest(p)
+                      for p in (json.loads(text).get("plugins") or []) if isinstance(p, dict)}
+          try:
+              before = entries(subprocess.run(["git", "show", "origin/${{ github.base_ref }}:index.json"],
+                                              capture_output=True, text=True, check=True).stdout)
+          except subprocess.CalledProcessError:
+              before = {}
+          after = entries(open("index.json", encoding="utf-8").read())
+          changed = sorted(f"{i} {v}" for (i, v), d in after.items()
+                           if (i, v) in before and before[(i, v)] != d)
+          if changed:
+              print("these versions changed after they were published: " + ", ".join(changed))
+              print("publish the change as a new version instead")
+              sys.exit(1)
+          print(f"{len(after)} listing(s); no published version changed")
+          EOF
 
       - name: Review each submission
         run: |
